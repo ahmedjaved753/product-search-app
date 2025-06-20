@@ -1,14 +1,31 @@
 "use server";
 
-import { getSearchMetadata as getMetadataFromService } from "@/services";
+import { SearchEngine } from "@/lib/search-engine";
+import { initializeSearchIndex } from "@/lib/startup-processor";
 
 /**
  * Server Action: Get metadata for search filters
- * Now uses the service layer for consistency
+ * Uses search engine directly to avoid circular dependencies
  */
 export async function getSearchMetadata() {
   try {
-    const metadata = await getMetadataFromService();
+    // Initialize search index and create engine
+    const products = await initializeSearchIndex();
+    const engine = new SearchEngine(products);
+
+    // Get metadata from search engine
+    const vendors = engine.getUniqueVendors();
+    const productTypes = engine.getUniqueProductTypes();
+    const priceRange = engine.getPriceRange();
+    const stats = engine.getStats();
+
+    const metadata = {
+      vendors,
+      productTypes,
+      priceRange,
+      stats,
+    };
+
     return {
       success: true,
       data: metadata,

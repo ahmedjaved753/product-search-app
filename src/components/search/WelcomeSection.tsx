@@ -19,14 +19,12 @@ export function WelcomeSection({ metadata, onBrandClick }: WelcomeSectionProps) 
                         <div className="mx-auto h-16 w-16 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
                             <Search className="h-8 w-8 text-blue-600" />
                         </div>
-                        <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 animate-bounce" />
                     </div>
 
                     <div className="space-y-2">
                         <h3 className="text-xl font-semibold">Start Your Discovery Journey</h3>
                         <p className="text-muted-foreground max-w-md mx-auto">
-                            Search through {metadata?.stats.totalProducts.toLocaleString()} products
-                            from {metadata?.stats.uniqueVendors} brands across {metadata?.stats.uniqueProductTypes} categories
+                            Search across {metadata?.stats.uniqueVendors} brands and {metadata?.stats.uniqueProductTypes} categories
                         </p>
                     </div>
 

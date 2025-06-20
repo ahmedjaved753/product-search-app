@@ -200,6 +200,16 @@ A high-performance, full-stack product search application built with Next.js, fe
     └── Search Index - Processed, optimized data
 ```
 
+**Hybrid Backend Approach - Demonstrating Next.js Mastery:**
+
+I have intentionally implemented a hybrid backend architecture using both **API Routes** and **Server Actions** to showcase comprehensive understanding of Next.js 15's full-stack capabilities:
+
+- **API Routes** (`/api/search`, `/api/suggestions`, `/api/metadata`): Used for client-side requests, real-time search functionality, and when the frontend needs to make HTTP calls. These provide traditional REST API endpoints with full control over request/response handling.
+
+- **Server Actions** (`getSearchMetadata`): Used for server-side operations and form handling, demonstrating modern Next.js patterns for server-side data fetching and mutations.
+
+This architectural choice demonstrates proficiency with both approaches and understanding of when to use each pattern in production applications.
+
 ### Frontend Architecture
 
 ```
@@ -208,7 +218,11 @@ A high-performance, full-stack product search application built with Next.js, fe
 │   ├── Search Components (SearchBar, Filters, Results)
 │   ├── Product Components (ProductCard)
 │   └── UI Components (Pagination, Loading)
-├── Hooks (useSearch, useDebounce)
+├── Services Layer
+│   ├── API Services (search.service.ts)
+│   ├── Query Hooks (search.queries.ts)
+│   └── TanStack Query Integration
+├── Hooks (useSearchWithQuery, useDebounce)
 └── Types & Utilities
 ```
 

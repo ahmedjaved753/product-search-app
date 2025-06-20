@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Package, Users, Grid3X3 } from 'lucide-react';
+import { Search, Users, Grid3X3 } from 'lucide-react';
 import { SearchMetadata } from '@/services/search.service';
 
 interface HeaderProps {
@@ -34,18 +34,6 @@ export function Header({ metadata }: HeaderProps) {
                     {/* Stats - Desktop */}
                     {metadata && (
                         <div className="hidden lg:flex items-center space-x-8">
-                            <div className="flex items-center space-x-2">
-                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100">
-                                    <Package className="h-4 w-4 text-blue-600" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-semibold text-slate-900">
-                                        {metadata.stats.totalProducts.toLocaleString()}
-                                    </p>
-                                    <p className="text-xs text-slate-500">Products</p>
-                                </div>
-                            </div>
-
                             <div className="flex items-center space-x-2">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100">
                                     <Users className="h-4 w-4 text-emerald-600" />

@@ -4,7 +4,6 @@ import { SearchResult } from '@/lib/types';
 import { ArrowUpDown, BarChart3 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
 interface SearchStatsProps {
     results: SearchResult;
