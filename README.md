@@ -2,9 +2,9 @@
 
 A high-performance, full-stack product search application built with Next.js, featuring intelligent search, advanced filtering, and modern UI components. This application demonstrates chunked CSV processing, fuzzy search capabilities, and production-ready architecture patterns.
 
-## 🎬 Demo
+## 🎬 Demo (https://product-search-app-git-main-ahmedjaved753s-projects.vercel.app/)
 
-_Demo video will be uploaded to showcase the application's features and functionality._
+[_Demo video will be uploaded to showcase the application's features and functionality._](https://drive.google.com/file/d/1N60N-sUIlr-IxFZknNbplK2bpR1kqSUP/view?usp=sharing)
 
 ## 📋 Assignment Requirements & Approach
 
