@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Search, X, Loader2, Sparkles } from 'lucide-react';
+import { Search, X, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -163,14 +163,6 @@ export function SearchBar({ query, onQueryChange, onClear, loading = false }: Se
                             </div>
                         ) : suggestions.length > 0 ? (
                             <>
-                                <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-slate-100/50 border-b border-slate-100">
-                                    <div className="flex items-center space-x-2">
-                                        <Sparkles className="h-4 w-4 text-blue-500" />
-                                        <span className="text-xs font-medium text-slate-600 uppercase tracking-wide">
-                                            AI Suggestions
-                                        </span>
-                                    </div>
-                                </div>
                                 {suggestions.map((suggestion, index) => (
                                     <Button
                                         key={index}

@@ -114,7 +114,41 @@ Warning: Extra attributes from the server: data-new-gr-c-s-check-loaded
 
 ## 🛠️ Build Issues
 
-### **14. TypeScript Errors**
+### **14. Vercel Read-Only File System Errors**
+
+**Issue**: `EROFS: read-only file system, copyfile` errors on Vercel deployment
+**Root Cause**: Vercel's serverless environment has read-only file system after deployment
+**Symptoms**:
+
+- All API endpoints returning 500 errors
+- CSV processing failing in production
+- Search index generation errors
+
+**Solution**: Environment detection and build-time index generation
+**Files Modified**:
+
+- `src/lib/csv-processor.ts` - Skips file writing in production
+- `src/lib/startup-processor.ts` - Only loads existing indexes
+- `scripts/generate-index.ts` - Build-time index generation
+
+**Implementation**:
+
+```typescript
+const isProduction = () =>
+  process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
+
+if (!isProduction()) {
+  await this.saveSearchIndex(products, metadata);
+}
+```
+
+**Deployment Fix**:
+
+1. Ensure `npm run generate-index` runs during build
+2. Pre-built `data/search-index.json` must exist
+3. All file writing operations skip in production
+
+### **15. TypeScript Errors**
 
 **Issue**: Type errors during build
 **Common Causes**:
@@ -125,7 +159,7 @@ Warning: Extra attributes from the server: data-new-gr-c-s-check-loaded
   **Solution**: Proper type guards and optional chaining
   **Files**: `src/lib/types.ts`, component files
 
-### **15. Next.js Build Failures**
+### **16. Next.js Build Failures**
 
 **Issue**: Build failing on production
 **Common Causes**:

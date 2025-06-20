@@ -160,9 +160,19 @@ CREATE INDEX idx_products_price ON products(price);
 
 ### **Vercel (Recommended)**
 
+**⚠️ CRITICAL: Vercel Read-Only File System Limitation**
+
+Vercel's serverless environment has a read-only file system after deployment. This affects CSV processing:
+
+- **Issue**: Cannot write files during runtime (EROFS errors)
+- **Solution**: Pre-generate search index during build process
+- **Implementation**: Environment detection in csv-processor.ts and startup-processor.ts
+- **Build Command**: Must include `npm run generate-index`
+
 ```json
 // vercel.json
 {
+  "buildCommand": "npm run generate-index && npm run build",
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 10
@@ -181,6 +191,12 @@ CREATE INDEX idx_products_price ON products(price);
   ]
 }
 ```
+
+**Files that handle this limitation:**
+
+- `src/lib/csv-processor.ts` - Skips file writing in production
+- `src/lib/startup-processor.ts` - Only loads existing indexes
+- `scripts/generate-index.ts` - Build-time index generation
 
 ### **Docker Deployment**
 

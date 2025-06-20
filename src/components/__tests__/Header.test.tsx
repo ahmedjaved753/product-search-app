@@ -6,7 +6,6 @@ import { SearchMetadata } from '@/services/search.service';
 // Mock the lucide-react icons
 jest.mock('lucide-react', () => ({
     Search: () => <div data-testid="search-icon" />,
-    Package: () => <div data-testid="package-icon" />,
     Users: () => <div data-testid="users-icon" />,
     Grid3X3: () => <div data-testid="grid-icon" />,
 }));
@@ -36,44 +35,51 @@ describe('Header', () => {
     it('should render stats when metadata is provided', () => {
         render(<Header metadata={mockMetadata} />);
 
-        // Check if stats are displayed
-        expect(screen.getByText('5,954')).toBeInTheDocument();
-        expect(screen.getByText('Products')).toBeInTheDocument();
+        // Check if stats are displayed (only Brands and Categories, no Products count)
         expect(screen.getByText('125')).toBeInTheDocument();
         expect(screen.getByText('Brands')).toBeInTheDocument();
         expect(screen.getByText('45')).toBeInTheDocument();
         expect(screen.getByText('Categories')).toBeInTheDocument();
+
+        // Products count should not be displayed
+        expect(screen.queryByText('5,954')).not.toBeInTheDocument();
+        expect(screen.queryByText('Products')).not.toBeInTheDocument();
     });
 
     it('should not render stats when metadata is not provided', () => {
         render(<Header />);
 
         // Stats should not be present
-        expect(screen.queryByText('Products')).not.toBeInTheDocument();
         expect(screen.queryByText('Brands')).not.toBeInTheDocument();
         expect(screen.queryByText('Categories')).not.toBeInTheDocument();
     });
 
-    it('should format numbers with commas', () => {
+    it('should display numbers without formatting', () => {
         const metadataWithLargeNumbers: SearchMetadata = {
             ...mockMetadata,
             stats: {
                 ...mockMetadata.stats,
-                totalProducts: 1234567,
+                uniqueVendors: 1234,
+                uniqueProductTypes: 567,
             },
         };
 
         render(<Header metadata={metadataWithLargeNumbers} />);
 
-        expect(screen.getByText('1,234,567')).toBeInTheDocument();
+        // Numbers are displayed directly without comma formatting
+        expect(screen.getByText('1234')).toBeInTheDocument();
+        expect(screen.getByText('567')).toBeInTheDocument();
     });
 
     it('should render icons in stats', () => {
         render(<Header metadata={mockMetadata} />);
 
-        expect(screen.getByTestId('package-icon')).toBeInTheDocument();
+        // Only Users and Grid icons are shown (no Package icon)
         expect(screen.getByTestId('users-icon')).toBeInTheDocument();
         expect(screen.getByTestId('grid-icon')).toBeInTheDocument();
+
+        // Package icon should not be present
+        expect(screen.queryByTestId('package-icon')).not.toBeInTheDocument();
     });
 
     it('should have proper styling classes', () => {
@@ -89,7 +95,6 @@ describe('Header', () => {
             ...mockMetadata,
             stats: {
                 ...mockMetadata.stats,
-                totalProducts: 0,
                 uniqueVendors: 0,
                 uniqueProductTypes: 0,
             },
@@ -99,6 +104,6 @@ describe('Header', () => {
 
         // Since there are multiple "0" values, let's check for all of them
         const zeroElements = screen.getAllByText('0');
-        expect(zeroElements).toHaveLength(3); // Products, Brands, Categories
+        expect(zeroElements).toHaveLength(2); // Only Brands and Categories (no Products)
     });
 }); 

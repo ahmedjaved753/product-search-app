@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/QueryProvider";
@@ -18,7 +18,11 @@ export const metadata: Metadata = {
   description: "Advanced product search with intelligent filtering, real-time suggestions, and responsive design. Built with Next.js and powered by fuzzy search technology.",
   keywords: "product search, e-commerce, filtering, Next.js, search engine",
   authors: [{ name: "Product Search Team" }],
-  viewport: "width=device-width, initial-scale=1",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 

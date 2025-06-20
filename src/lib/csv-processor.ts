@@ -30,6 +30,31 @@ import { createReadStream } from "fs";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { parse } from "csv-parse";
+import fs from "fs";
+import path from "path";
+import { Product } from "./types";
+
+/**
+ * CSVProcessor handles parsing and processing of product CSV data.
+ *
+ * VERCEL PRODUCTION LIMITATION
+ * ============================
+ * Vercel's serverless environment has a read-only file system after deployment.
+ * This processor detects the production environment and skips file writing operations:
+ *
+ * Development Behavior:
+ * - Reads CSV files from public/ or data/ directories
+ * - Can write processed data and indexes to disk
+ * - Full file system access for development and testing
+ *
+ * Production Behavior (Vercel):
+ * - Only reads existing files (CSV data, pre-built indexes)
+ * - Skips any file writing operations to prevent EROFS errors
+ * - Relies on build-time processing for optimal performance
+ *
+ * The isProduction() check ensures the processor works seamlessly in both
+ * environments without throwing "read-only file system" errors in production.
+ */
 
 // Types for better TypeScript support
 export interface ProcessingConfig {
@@ -59,27 +84,6 @@ export interface ProcessingMetadata {
   vendors: string[];
   productTypes: string[];
   processedAt: string;
-}
-
-export interface Product {
-  id: string;
-  title: string;
-  vendor: string;
-  productType: string;
-  description: string;
-  handle: string;
-  status: string;
-  priceRange: { min: number; max: number };
-  images: string[];
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
-  publishedAt: string;
-  // Additional fields for stock management
-  totalInventory?: number;
-  hasOutOfStockVariants?: boolean;
-  isGiftCard?: boolean;
-  featuredImage?: string;
 }
 
 // Default configuration
@@ -387,6 +391,24 @@ export class CSVProcessor {
     products: Product[],
     metadata: ProcessingMetadata
   ): Promise<void> {
+    // Skip file writing in production environments (like Vercel)
+    const isProduction =
+      process.env.NODE_ENV === "production" || process.env.VERCEL;
+
+    if (isProduction) {
+      console.log(
+        "🌐 Production environment detected, skipping index file write"
+      );
+      console.log(
+        `📊 Index contains ${products.length.toLocaleString()} products`
+      );
+      console.log(`🏪 Found ${metadata.vendors.length} unique vendors`);
+      console.log(
+        `📦 Found ${metadata.productTypes.length} unique product types`
+      );
+      return;
+    }
+
     console.log("💾 Creating search index...");
 
     const dataDir = join(process.cwd(), "data");

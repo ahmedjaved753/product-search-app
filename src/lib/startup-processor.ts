@@ -11,6 +11,29 @@ interface StartupConfig {
   maxAgeHours?: number;
 }
 
+/**
+ * StartupProcessor handles initialization of the search engine with CSV data.
+ *
+ * IMPORTANT: Vercel Production Limitation
+ * =====================================
+ * In Vercel's serverless environment, the file system is read-only after deployment.
+ * This means we cannot write or modify files during runtime. The processor detects
+ * the production environment and adapts its behavior accordingly:
+ *
+ * Development Mode:
+ * - Can read CSV files and generate search indexes
+ * - Can write search-index.json to data/ directory
+ * - Full file system access for development workflow
+ *
+ * Production Mode (Vercel):
+ * - Only reads pre-built search-index.json from build process
+ * - Cannot generate or write new index files
+ * - Relies on build-time index generation (see scripts/generate-index.ts)
+ *
+ * This design ensures the application works in both environments while maintaining
+ * optimal performance through pre-built indexes in production.
+ */
+
 export class StartupProcessor {
   private csvPath: string;
   private indexPath: string;
@@ -31,7 +54,33 @@ export class StartupProcessor {
     console.log("🚀 Starting search index initialization...");
 
     try {
-      // Check if we need to regenerate the index
+      // In production (Vercel), always try to load existing index first
+      // as the file system is read-only
+      const isProduction =
+        process.env.NODE_ENV === "production" || process.env.VERCEL;
+
+      if (isProduction) {
+        console.log(
+          "🌐 Production environment detected, loading existing index..."
+        );
+        try {
+          const products = await this.loadIndex();
+          console.log(
+            `📊 Search index ready: ${products.length.toLocaleString()} products`
+          );
+          return products;
+        } catch (error) {
+          console.error(
+            "❌ Failed to load existing index in production:",
+            error
+          );
+          throw new Error(
+            "Search index not found. Please ensure the build process completed successfully."
+          );
+        }
+      }
+
+      // In development, check if we need to regenerate the index
       const shouldRegenerate = forceRegenerate || this.shouldRegenerateIndex();
 
       if (shouldRegenerate) {

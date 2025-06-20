@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useSearchWithQuery } from '@/hooks/useSearchWithQuery';
 import { useSearchMetadata } from '@/services';
 import { Header } from '@/components/layout/Header';
@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 
 export default function HomePage() {
   const [showFilters, setShowFilters] = useState(false);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   // Use the service layer for metadata
   const {
@@ -34,6 +35,19 @@ export default function HomePage() {
     setSortBy,
     clearSearch
   } = useSearchWithQuery();
+
+  // Enhanced page change handler with auto-scroll
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+
+    // Auto-scroll to results section for better UX
+    if (resultsRef.current) {
+      resultsRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
 
   const activeFiltersCount = Object.values(filters).filter(Boolean).length;
 
@@ -74,15 +88,17 @@ export default function HomePage() {
         <Separator className="max-w-4xl mx-auto" />
 
         {/* Results Section */}
-        <ResultsSection
-          results={results || null}
-          loading={loading}
-          error={error || null}
-          page={page}
-          onPageChange={setPage}
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-        />
+        <div ref={resultsRef}>
+          <ResultsSection
+            results={results || null}
+            loading={loading}
+            error={error || null}
+            page={page}
+            onPageChange={handlePageChange}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+          />
+        </div>
 
         {/* Welcome State */}
         {!query && !loading && !results && !metadataLoading && (
