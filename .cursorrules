@@ -1,0 +1,456 @@
+# Cursor Rules for Product Search Platform
+
+## Project Context
+
+This is a Next.js 15+ product search application built for a technical assessment. The app processes CSV product data and provides advanced search functionality with modern UI/UX patterns.
+
+## Core Technologies
+
+- **Framework**: Next.js 15.3.4 with App Router
+- **Language**: TypeScript (strict mode)
+- **Styling**: Tailwind CSS + Radix UI primitives
+- **Search**: Fuse.js for fuzzy search
+- **State Management**: React hooks + TanStack Query
+- **Data Processing**: Custom hybrid CSV processor
+
+## Code Style & Standards
+
+### TypeScript
+
+- Use strict TypeScript configuration
+- Prefer interfaces over types for object shapes
+- Use proper generic types for reusable components
+- Always define return types for functions
+- Use optional chaining and nullish coalescing
+- Prefer `const` assertions for immutable data
+
+```typescript
+// Good
+interface SearchFilters {
+  vendor?: string;
+  productType?: string;
+  priceRange?: { min: number; max: number };
+}
+
+const searchProduct = async (query: string): Promise<Product[]> => {
+  // implementation
+};
+
+// Avoid
+type SearchFilters = {
+  vendor: string | undefined;
+  productType: string | undefined;
+};
+```
+
+### Next.js App Router Patterns
+
+- Use Server Components by default, Client Components only when needed
+- Implement proper loading.tsx and error.tsx boundaries
+- Use Server Actions for form submissions and mutations
+- Prefer API Routes for real-time client-side requests
+- Implement proper metadata for SEO
+
+```typescript
+// Server Component (default)
+export default function ProductList() {
+  return <div>...</div>;
+}
+
+// Client Component (when needed)
+("use client");
+export default function SearchBar() {
+  const [query, setQuery] = useState("");
+  return <input value={query} onChange={(e) => setQuery(e.target.value)} />;
+}
+```
+
+### Component Architecture
+
+- Use composition over inheritance
+- Implement proper prop interfaces with JSDoc
+- Use forwardRef for components that need ref forwarding
+- Prefer named exports over default exports for utilities
+- Group related components in feature directories
+
+```typescript
+interface ProductCardProps {
+  /** Product data to display */
+  product: Product;
+  /** Optional click handler */
+  onClick?: (product: Product) => void;
+  /** Additional CSS classes */
+  className?: string;
+}
+
+export const ProductCard = ({
+  product,
+  onClick,
+  className,
+}: ProductCardProps) => {
+  // implementation
+};
+```
+
+## File Organization
+
+### Directory Structure
+
+```
+src/
+├── app/                    # App Router pages and layouts
+│   ├── api/               # API routes
+│   ├── globals.css        # Global styles
+│   ├── layout.tsx         # Root layout
+│   └── page.tsx           # Home page
+├── components/            # Reusable UI components
+│   ├── ui/               # Base UI primitives
+│   ├── search/           # Search-related components
+│   ├── product/          # Product-related components
+│   └── providers/        # Context providers
+├── hooks/                # Custom React hooks
+├── lib/                  # Utility functions and configurations
+└── types/               # TypeScript type definitions
+```
+
+### Naming Conventions
+
+- **Components**: PascalCase (e.g., `ProductCard.tsx`)
+- **Hooks**: camelCase with "use" prefix (e.g., `useSearch.ts`)
+- **Utilities**: camelCase (e.g., `formatPrice.ts`)
+- **Types**: PascalCase (e.g., `Product`, `SearchFilters`)
+- **Constants**: SCREAMING_SNAKE_CASE (e.g., `DEFAULT_PAGE_SIZE`)
+
+## Performance Best Practices
+
+### Data Handling
+
+- Use chunked processing for large CSV files
+- Implement proper memoization with useMemo/useCallback
+- Use React.lazy for code splitting when appropriate
+- Implement proper loading states and error boundaries
+
+```typescript
+// Good: Memoized expensive calculations
+const searchResults = useMemo(() => {
+  return searchEngine.search(query, filters);
+}, [query, filters]);
+
+// Good: Debounced search
+const debouncedQuery = useDebounce(query, 300);
+```
+
+### Caching Strategy
+
+- Use TanStack Query for server state management
+- Implement proper cache invalidation strategies
+- Use React Query DevTools in development
+- Set appropriate staleTime and gcTime values
+
+```typescript
+const { data, isLoading, error } = useQuery({
+  queryKey: ["search", query, filters, page],
+  queryFn: () => searchProducts({ query, filters, page }),
+  staleTime: 5 * 60 * 1000, // 5 minutes
+  gcTime: 10 * 60 * 1000, // 10 minutes
+});
+```
+
+## UI/UX Guidelines
+
+### Responsive Design
+
+- Use mobile-first approach with Tailwind breakpoints
+- Implement proper touch targets (min 44px)
+- Use semantic HTML elements for accessibility
+- Implement proper keyboard navigation
+
+```typescript
+// Good: Mobile-first responsive classes
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+```
+
+### Component Patterns
+
+- Use Radix UI primitives for complex components
+- Implement proper loading and error states
+- Use consistent spacing with Tailwind scale
+- Implement proper focus management
+
+```typescript
+// Good: Proper loading state
+{
+  isLoading ? (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {Array.from({ length: 12 }).map((_, i) => (
+        <ProductCardSkeleton key={i} />
+      ))}
+    </div>
+  ) : (
+    <ProductGrid products={products} />
+  );
+}
+```
+
+### Accessibility
+
+- Use proper ARIA labels and roles
+- Implement keyboard navigation
+- Ensure proper color contrast
+- Use semantic HTML elements
+
+## Error Handling
+
+### Client-Side Errors
+
+- Use React Error Boundaries for component errors
+- Implement proper form validation
+- Show user-friendly error messages
+- Log errors for debugging
+
+```typescript
+// Good: Proper error boundary
+export default function SearchError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+      <h2 className="text-xl font-semibold">Something went wrong!</h2>
+      <button onClick={reset} className="btn-primary">
+        Try again
+      </button>
+    </div>
+  );
+}
+```
+
+### API Error Handling
+
+- Return proper HTTP status codes
+- Provide meaningful error messages
+- Implement proper validation
+- Use try-catch blocks consistently
+
+```typescript
+// Good: API route error handling
+export async function GET(request: Request) {
+  try {
+    const searchParams = new URL(request.url).searchParams;
+    const query = searchParams.get("q");
+
+    if (!query) {
+      return NextResponse.json(
+        { error: "Search query is required" },
+        { status: 400 }
+      );
+    }
+
+    const results = await searchProducts(query);
+    return NextResponse.json(results);
+  } catch (error) {
+    console.error("Search API error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+```
+
+## Search Implementation
+
+### Fuse.js Configuration
+
+- Use appropriate threshold values (0.3-0.5)
+- Implement weighted field searching
+- Include relevance scores
+- Handle empty and edge cases
+
+```typescript
+const fuseOptions = {
+  keys: [
+    { name: "title", weight: 0.4 },
+    { name: "description", weight: 0.3 },
+    { name: "vendor", weight: 0.2 },
+    { name: "productType", weight: 0.1 },
+  ],
+  threshold: 0.4,
+  includeScore: true,
+  minMatchCharLength: 2,
+};
+```
+
+### Search UX Patterns
+
+- Implement debounced search (300ms)
+- Show loading states during search
+- Handle empty results gracefully
+- Provide search suggestions/autocomplete
+
+## Testing & Quality
+
+### Code Quality
+
+- Use ESLint with strict rules
+- Implement proper TypeScript strict mode
+- Use Prettier for consistent formatting
+- Write meaningful commit messages
+
+### Performance Monitoring
+
+- Monitor Core Web Vitals
+- Implement proper error tracking
+- Use React DevTools Profiler
+- Monitor bundle sizes
+
+## Security Considerations
+
+### Input Validation
+
+- Sanitize all user inputs
+- Use proper CSRF protection
+- Implement rate limiting for APIs
+- Validate file uploads properly
+
+### Data Handling
+
+- Don't expose sensitive data in client bundles
+- Use environment variables for secrets
+- Implement proper CORS headers
+- Use HTTPS in production
+
+## Documentation Standards
+
+### Code Comments
+
+- Use JSDoc for functions and components
+- Explain complex business logic
+- Document API endpoints properly
+- Include examples in documentation
+
+````typescript
+/**
+ * Searches products using fuzzy matching algorithm
+ * @param query - Search term entered by user
+ * @param filters - Additional filters to apply
+ * @param options - Search configuration options
+ * @returns Promise resolving to search results with scores
+ * @example
+ * ```typescript
+ * const results = await searchProducts('laptop', { vendor: 'Apple' });
+ * ```
+ */
+export async function searchProducts(
+  query: string,
+  filters: SearchFilters,
+  options: SearchOptions = {}
+): Promise<SearchResult[]> {
+  // implementation
+}
+````
+
+### README Requirements
+
+- Include clear setup instructions
+- Document environment variables
+- Explain architectural decisions
+- Provide usage examples
+- Include troubleshooting guide
+
+## Production Readiness
+
+### Build Optimization
+
+- Optimize bundle sizes
+- Implement proper code splitting
+- Use Next.js Image optimization
+- Configure proper caching headers
+
+### Monitoring
+
+- Implement error tracking
+- Monitor performance metrics
+- Set up proper logging
+- Configure health checks
+
+## Project-Specific Patterns
+
+### CSV Processing
+
+- Use the hybrid processor pattern (OOP lifecycle + functional transformations)
+- Implement chunked processing for memory efficiency
+- Handle Shopify-specific data formats properly
+- Include proper error handling and performance metrics
+
+```typescript
+// Good: Hybrid processor usage
+const processor = new CSVProcessorHybrid({
+  chunkSize: 2000,
+  enableMetrics: true,
+  validateData: true,
+});
+
+const products = await processor.processFile("products.csv");
+```
+
+### Search Engine Patterns
+
+- Use singleton pattern for search engine instances
+- Implement proper price sorting (valid prices first, then no-price products)
+- Cache search indexes for performance
+- Handle empty states and edge cases gracefully
+
+```typescript
+// Good: Proper price sorting
+private applySorting(products: Product[], sortBy: string): Product[] {
+  if (sortBy === 'price-asc') {
+    return products.sort((a, b) => {
+      const priceA = a.price || a.priceRange?.min;
+      const priceB = b.price || b.priceRange?.min;
+
+      // Products with valid prices first
+      if (!priceA && !priceB) return 0;
+      if (!priceA) return 1;
+      if (!priceB) return -1;
+
+      return priceA - priceB;
+    });
+  }
+  // ... other sorting logic
+}
+```
+
+### UI Component Patterns
+
+- Remove unnecessary AI branding and decorative elements
+- Focus on functional, user-centric messaging
+- Use clean stat displays instead of bulky cards
+- Implement proper loading states and error boundaries
+
+```typescript
+// Good: Clean stat display
+<div className="flex items-center space-x-2">
+  <div className="p-2 bg-blue-100 rounded-lg">
+    <Package className="h-4 w-4 text-blue-600" />
+  </div>
+  <div>
+    <p className="font-semibold text-slate-900">
+      {totalProducts.toLocaleString()}
+    </p>
+    <p className="text-sm text-slate-500">Products</p>
+  </div>
+</div>
+```
+
+### Memory Bank Integration
+
+- Document all major decisions and changes
+- Update troubleshooting guides when issues are resolved
+- Maintain architecture documentation as system evolves
+- Keep feature inventory current with implementations
+
+Remember: This is a technical assessment, so demonstrate best practices, thoughtful architecture decisions, and production-ready code quality throughout the implementation.
